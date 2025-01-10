@@ -1,5 +1,4 @@
 # LongVA_CD
-# LongVA & V-NIAH
 <p align="center">
     <img src="vision_niah/niah_output/LongVA-7B/heatmap.png" width="800">
 </p>
@@ -96,6 +95,17 @@ print(outputs)
 ```
 </details>
 
+## Question for environments
+-- deepspeed
+conda activate longlv
+conda install -c conda-forge cudatoolkit-dev
+which nvcc
+which nvcc返回的是../m/miniconda/envs/longva/bin/nvcc
+ls -l ../m/miniconda/envs/longva/bin/nvcc
+export CUDA_HOME=../m/miniconda/envs/longva
+
+--flash-attn
+https://github.com/Dao-AILab/flash-attention/releases
 
 
 ## Acknowledgement
