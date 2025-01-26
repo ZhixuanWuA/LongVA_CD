@@ -1,24 +1,4 @@
 # LongVA_CD
-<p align="center">
-    <img src="vision_niah/niah_output/LongVA-7B/heatmap.png" width="800">
-</p>
-
-<p align="center">
-    🌐 <a href="https://lmms-lab.github.io/posts/longva/" target="_blank">Blog</a> | 📃 <a href="https://arxiv.org/abs/2406.16852" target="_blank">Paper</a> | 🤗 <a href="https://huggingface.co/collections/lmms-lab/longva-667538e09329dbc7ea498057" target="_blank">Hugging Face</a> | 🎥 <a href="https://longva-demo.lmms-lab.com/" target="_blank">Demo</a>
-
-</p>
-
-![Static Badge](https://img.shields.io/badge/lmms--eval-certified-red?link=https%3A%2F%2Fgithub.com%2FEvolvingLMMs-Lab%2Flmms-eval)  ![Static Badge](https://img.shields.io/badge/llava--next-credit-red?link=https%3A%2F%2Fgithub.com%2FLLaVA-VL%2FLLaVA-NeXT)
-
-Long context capability can **zero-shot transfer** from language to vision.
-
-LongVA can process **2000** frames or over **200K** visual tokens. It achieves **state-of-the-art** performance on Video-MME among 7B models.
-
-## News
-
-
-- [2024/08/08] 🔥 Released training code for vision text alignment.
-- [2024/06/24] 🔥 LongVA is released. Training code for vision text alignment is coming soon.
   
 ## Installation 
 This codebase is tested on CUDA 11.8 and A100-SXM-80G.
@@ -29,6 +9,14 @@ pip install -e "longva/.[train]"
 pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
 pip install -r requirements.txt
 ```
+### Run
+1. temporal
+run https://github.com/ZhixuanWuA/LongVA_CD/blob/main/inference/videoprocess/VCD_tem_ranreverse.py
+form temporal dataset (A fragment is formed every 4s, and then the order is shuffled so that the order within the fragment is unchanged)
+2. spatial
+sam2-grounding: mask main objects
+3. 2st branch
+   bash ./inference/bash/..
 
 
 ## Local Demo
