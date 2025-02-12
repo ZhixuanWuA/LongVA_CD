@@ -9,6 +9,11 @@ pip install -e "longva/.[train]"
 pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
 pip install -r requirements.txt
 ```
+
+## Download
+lmms-lab/LongVA-7B: https://huggingface.co/lmms-lab/LongVA-7B
+openai/clip-vit-large-patch14-336: https://huggingface.co/lmms-lab/LongVA-7BP
+
 ### Run
 1. temporal
 run https://github.com/ZhixuanWuA/LongVA_CD/blob/main/inference/videoprocess/VCD_tem_ranreverse.py
