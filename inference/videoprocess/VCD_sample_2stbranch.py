@@ -116,9 +116,9 @@ def sample(
             continue  # don't waste resources running the code we don't need
 
         next_token_logits = outputs.logits[:, -1, :]
+        
 
         ## For contrastive decoding initial
-        # print(f'model_kwargs:{model_kwargs}')
         use_cd = model_kwargs.get("images_mask") != None
         use_temcd = model_kwargs.get("image_tem") != None
         output_attentions_wo_img = (
@@ -132,8 +132,7 @@ def sample(
         if use_cd and use_temcd:
             ## cd_comments: forward pass of the model with distorted image input
             model_inputs_cd = self.prepare_inputs_for_generation_cd(input_ids, **model_kwargs_cd)
-            model_inputs_temcd = self.prepare_inputs_for_generation_temcd(input_ids, **model_kwargs_temcd)
-            # print(f'model_inputs_cd:{model_inputs_cd}, model_inputs_temcd:{model_inputs_temcd}')
+            model_inputs_temcd = self.prepare_inputs_for_generation_temcd(input_ids, **model_kwargs_cd)
             outputs_cd = self(
                 **model_inputs_cd,
                 return_dict=True,
@@ -148,7 +147,6 @@ def sample(
             )
             next_token_logits_cd = outputs_cd.logits[:, -1, :]
             next_token_logits_temcd = outputs_temcd.logits[:, -1, :]
-            # print("next_token_logits_cd Min:", next_token_logits_cd.min().item(), "Max:", next_token_logits_cd.max().item())
             
             ## cd_comments: pre-process logits from contrastive inputs
             cd_alpha = model_kwargs.get("cd_alpha") if model_kwargs.get("cd_alpha") is not None else 0.5
@@ -160,13 +158,10 @@ def sample(
 
             # version 2 set cutoff for Adaptive Plausibility Constraints
             cutoff = torch.log(torch.tensor(cd_beta)) + next_token_logits.max(dim=-1, keepdim=True).values
-            # cutoff = torch.log(torch.tensor(cd_beta)) + next_token_logits.mean(dim=-1, keepdim=True)
-            # print("cutoff Min:", cutoff.min().item(), "Max:", cutoff.max().item())
             
-            diffs = (1+cd_alpha)*next_token_logits - cd_alpha*((1/2)*next_token_logits_cd-(1/2)*next_token_logits_temcd)
-            # print("diffs Min:", diffs.min().item(), "Max:", diffs.max().item())
+            # diffs = (1+cd_alpha)*next_token_logits - cd_alpha*(next_token_logits_cd-next_token_logits_temcd)
+            diffs = (1+cd_alpha)*next_token_logits - cd_alpha*(next_token_logits_temcd-next_token_logits_cd)
             cd_logits = diffs.masked_fill(next_token_logits < cutoff, -float("inf"))
-            # print("cd_logits Min:", cd_logits.min().item(), "Max:", cd_logits.max().item())
 
             ## cd_comments: apply temperature warping and top-k filtering in contrastive decoding
             cd_logits = logits_processor(input_ids, cd_logits)
@@ -174,10 +169,7 @@ def sample(
 
             next_token_scores = cd_logits
             cd_probs = nn.functional.softmax(cd_logits, dim=-1)
-            # print("cd_probs Min:", cd_probs.min().item(), "Max:", cd_probs.max().item())
             next_tokens = torch.multinomial(cd_probs, num_samples=1).squeeze(1)
-            # print(f'next_tokens:{next_tokens}')
-
         else:
             next_token_scores = logits_processor(input_ids, next_token_logits)
             next_token_scores = logits_warper(input_ids, next_token_scores)
@@ -213,7 +205,6 @@ def sample(
 
         # update generated ids, model inputs, and length for next step
         input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
-
         if streamer is not None:
             streamer.put(next_tokens.cpu())
         model_kwargs = self._update_model_kwargs_for_generation(
@@ -222,12 +213,12 @@ def sample(
         ## cd_comments: update model_kwargs_cd for contrastive decoding
         if use_cd:
             model_kwargs_cd = self._update_model_kwargs_for_generation(
-                outputs, model_kwargs_cd, is_encoder_decoder=self.config.is_encoder_decoder
+                outputs_cd, model_kwargs_cd, is_encoder_decoder=self.config.is_encoder_decoder
             )
-        
+            
         if use_temcd:
             model_kwargs_temcd = self._update_model_kwargs_for_generation(
-                outputs, model_kwargs_temcd, is_encoder_decoder=self.config.is_encoder_decoder
+                outputs_temcd, model_kwargs_temcd, is_encoder_decoder=self.config.is_encoder_decoder
             )
 
         # if eos_token was found in one sentence, set sentence to finished
@@ -273,3 +264,5 @@ def sample(
 
 def evolve_vcd_sampling():
     transformers.generation.utils.GenerationMixin.sample = sample
+    # sample is now a protected function in the latest Transformers library
+    transformers.generation.utils.GenerationMixin._sample = sample
