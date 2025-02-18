@@ -91,7 +91,7 @@ def get_model_output(model, video_processor, tokenizer, video, video_temcd, vide
     vr_tem = VideoReader(video_temcd, ctx=cpu(0))
     total_frame_num_tem = len(vr_tem)
     uniform_sampled_frame_tem = np.linspace(0, total_frame_num_tem - 1, args.max_frames_num, dtype=int)
-    frame_idx_tem = uniform_sampled_frames_tem.tolist()
+    frame_idx_tem = uniform_sampled_frame_tem.tolist()
     frames_tem = vr.get_batch(frame_idx_tem).asnumpy()
 
     if args.use_temcd:
