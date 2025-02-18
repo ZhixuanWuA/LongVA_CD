@@ -86,13 +86,13 @@ def get_model_output(model, video_processor, tokenizer, video, video_temcd, vide
     total_frame_num_spa = len(vr_spa)
     uniform_sampled_frame_spa = np.linspace(0, total_frame_num_spa - 1, args.max_frames_num, dtype=int)
     frame_idx_spa = uniform_sampled_frame_spa.tolist()
-    frames_spa = vr.get_batch(frame_idx_spa).asnumpy()
+    frames_spa = vr_spa.get_batch(frame_idx_spa).asnumpy()
     
     vr_tem = VideoReader(video_temcd, ctx=cpu(0))
     total_frame_num_tem = len(vr_tem)
     uniform_sampled_frame_tem = np.linspace(0, total_frame_num_tem - 1, args.max_frames_num, dtype=int)
     frame_idx_tem = uniform_sampled_frame_tem.tolist()
-    frames_tem = vr.get_batch(frame_idx_tem).asnumpy()
+    frames_tem = vr_tem.get_batch(frame_idx_tem).asnumpy()
 
     if args.use_temcd:
             print(f'begining tem cd function...')
