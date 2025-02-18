@@ -1,7 +1,7 @@
 # LongVA_CD
   
 ## Installation 
-This codebase is tested on CUDA 11.8 and A100-SXM-80G.
+This codebase is tested on CUDA 11.8 and A40-45G.
 ```bash
 conda create -n longva python=3.10 -y && conda activate longva
 pip install torch==2.1.2 torchvision --index-url https://download.pytorch.org/whl/cu118
